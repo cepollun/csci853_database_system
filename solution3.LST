@@ -1,0 +1,50 @@
+SQL> SET ECHO ON
+SQL> SET FEEDBACK ON
+SQL> SET LINESIZE 100
+SQL> SET PAGESIZE 200
+SQL> SET SERVEROUTPUT ON
+SQL> 
+SQL> create or replace TRIGGER trigger_2
+  2  BEFORE UPDATE ON TRIP
+  3  FOR EACH ROW
+  4  DECLARE
+  5    t_diff number;
+  6  BEGIN
+  7          SELECT round(sysdate-:OLD.TRIP_DATE)  INTO t_diff from dual;
+  8          IF   t_diff> 10  
+  9          THEN
+ 10               RAISE_APPLICATION_ERROR(-20002, 'Time over limitation yet!!!!'); 
+ 11          ELSE
+ 12              dbms_output.put_line('Update operation has been achieved successfully!!!');
+ 13          END IF;
+ 14  
+ 15  END;
+ 16  /
+
+Trigger TRIGGER_2 compiled
+
+SQL> 
+SQL> BEGIN
+  2        UPDATE TRIP SET TRIP_DATE =TO_DATE('26-JUL-2019','DD-MON-YYYY') WHERE T# = 113;
+  3        UPDATE TRIP SET TRIP_DATE =TO_DATE('16-JUL-2019','DD-MON-YYYY') WHERE T# = 115;
+  4  
+  5  
+  6  END;
+  7  /
+Update operation has been achieved successfully!!!
+
+
+Error starting at line : 25 in command -
+BEGIN
+      UPDATE TRIP SET TRIP_DATE =TO_DATE('26-JUL-2019','DD-MON-YYYY') WHERE T# = 113;
+      UPDATE TRIP SET TRIP_DATE =TO_DATE('16-JUL-2019','DD-MON-YYYY') WHERE T# = 115;
+
+
+END;
+Error report -
+ORA-20002: Time over limitation yet!!!!
+ORA-06512: at "XUCHANG.TRIGGER_2", line 7
+ORA-04088: error during execution of trigger 'XUCHANG.TRIGGER_2'
+ORA-06512: at line 3
+
+SQL> SPOOL OFF

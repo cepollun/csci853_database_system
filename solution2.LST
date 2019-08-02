@@ -1,0 +1,48 @@
+SQL> SET ECHO ON
+SQL> SET FEEDBACK ON
+SQL> SET LINESIZE 100
+SQL> SET PAGESIZE 200A
+SP2-0268: pagesize option not a valid number
+SQL> SET SERVEROUTPUT ON
+SQL> 
+SQL> CREATE OR REPLACE TRIGGER trigger_solution2
+  2    BEFORE INSERT OR DELETE OR UPDATE ON TRIP
+  3    BEGIN
+  4    update driver set  totaltripnum = (select COUNT(T#) from trip where driver.L# = trip.L#);
+  5      IF INSERTING THEN
+  6         dbms_output.put_line('INSERTING operation has been achieved successfully!!!');
+  7  --       select COUNT(T#) from trip where driver.L# = trip.L#;
+  8      ELSIF DELETING THEN
+  9         dbms_output.put_line('DELETING operation has been achieved successfully!!!');
+ 10  --       select COUNT(T#) from trip where driver.L# = trip.L#;
+ 11      ELSIF UPDATING THEN 
+ 12         dbms_output.put_line('UPDATING operation has been achieved successfully!!!');
+ 13  --       select COUNT(T#) from trip where driver.L# = trip.L#;
+ 14      END IF;
+ 15    END;
+ 16  /
+
+Trigger TRIGGER_SOLUTION2 compiled
+
+SQL> 
+SQL> EXECUTE INSERT INTO TRIP VALUES(124, 10003, 'SST005', TO_DATE('31-AUG-2002','DD-MON-YYYY') );
+INSERTING operation has been achieved successfully!!!
+
+
+PL/SQL procedure successfully completed.
+
+SQL> EXECUTE UPDATE TRIP SET  TRIP_DATE = TO_DATE('26-JUL-2019','DD-MON-YYYY' )WHERE T# = 124 AND L#=10003 AND REG#='SST005' AND TRIP_DATE = TO_DATE('31-AUG-2002','DD-MON-YYYY' );;
+UPDATING operation has been achieved successfully!!!
+
+
+PL/SQL procedure successfully completed.
+
+SQL> EXECUTE DELETE FROM TRIP WHERE L# = 124 AND T#=10003 AND REG#='SST005' AND TRIP_DATE = TO_DATE('26-JUL-2019','DD-MON-YYYY' );
+DELETING operation has been achieved successfully!!!
+
+
+PL/SQL procedure successfully completed.
+
+SQL> 
+SQL> 
+SQL> SPOOL OFF
