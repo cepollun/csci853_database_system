@@ -1,0 +1,237 @@
+MongoDB shell version v4.0.10
+connecting to: mongodb://127.0.0.1:27017/?gssapiServiceName=mongodb
+Implicit session: session { "id" : UUID("cf8664fc-1037-4e98-9db3-e5429a33aa36") }
+MongoDB server version: 4.0.10
+Server has startup warnings:
+2019-08-02T09:53:27.925+0800 I CONTROL  [initandlisten]
+2019-08-02T09:53:27.926+0800 I CONTROL  [initandlisten] ** WARNING: Access control is not enabled for the database.
+2019-08-02T09:53:27.926+0800 I CONTROL  [initandlisten] **          Read and write access to data and configuration is unrestricted.
+2019-08-02T09:53:27.927+0800 I CONTROL  [initandlisten]
+2019-08-02T09:53:27.928+0800 I CONTROL  [initandlisten] ** WARNING: This server is bound to localhost.
+2019-08-02T09:53:27.928+0800 I CONTROL  [initandlisten] **          Remote systems will be unable to connect to this server.
+2019-08-02T09:53:27.929+0800 I CONTROL  [initandlisten] **          Start the server with --bind_ip <address> to specify which IP
+2019-08-02T09:53:27.930+0800 I CONTROL  [initandlisten] **          addresses it should serve responses from, or with --bind_ip_all to
+2019-08-02T09:53:27.931+0800 I CONTROL  [initandlisten] **          bind to all interfaces. If this behavior is desired, start the
+2019-08-02T09:53:27.931+0800 I CONTROL  [initandlisten] **          server with --bind_ip 127.0.0.1 to disable this warning.
+2019-08-02T09:53:27.932+0800 I CONTROL  [initandlisten]
+---
+Enable MongoDB's free cloud-based monitoring service, which will then receive and display
+metrics about your deployment (disk utilization, CPU, operation statistics, etc).
+
+The monitoring data will be available on a MongoDB website with a unique URL accessible to you
+and anyone you share the URL with. MongoDB may use this information to make product
+improvements and to suggest MongoDB products and deployment options to you.
+
+To enable free monitoring, run the following command: db.enableFreeMonitoring()
+To permanently disable this reminder, run the following command: db.disableFreeMonitoring()
+---
+
+> // 1
+> db.transport.find(
+...     {"EMPLOYEE.e#":"11"},
+...     {"EMPLOYEE.trips":false}
+... ).pretty();
+{
+        "_id" : "11",
+        "EMPLOYEE" : {
+                "e#" : "11",
+                "name" : "Adam Fox",
+                "dob" : "04-MAY-70",
+                "address" : "45 Victoria St. Hurstville, NSW 2456",
+                "hiredate" : "12-JAN-99",
+                "position" : "driver",
+                "licence" : "20005",
+                "status" : "ON LEAVE"
+        }
+}
+> // 2
+> db.transport.find(
+...     {"EMPLOYEE.position":"mechanic"},
+...     {"EMPLOYEE.e#":true,"EMPLOYEE.name":true,"EMPLOYEE.position":true}
+... ).pretty();
+{
+        "_id" : "2",
+        "EMPLOYEE" : {
+                "e#" : "2",
+                "name" : "Peter Taylor",
+                "position" : "mechanic"
+        }
+}
+{
+        "_id" : "4",
+        "EMPLOYEE" : {
+                "e#" : "4",
+                "name" : "John Gray",
+                "position" : "mechanic"
+        }
+}
+{
+        "_id" : "6",
+        "EMPLOYEE" : {
+                "e#" : "6",
+                "name" : "Michael Jones",
+                "position" : "mechanic"
+        }
+}
+{
+        "_id" : "8",
+        "EMPLOYEE" : {
+                "e#" : "8",
+                "name" : "Peter O'Brien",
+                "position" : "mechanic"
+        }
+}
+{
+        "_id" : "10",
+        "EMPLOYEE" : {
+                "e#" : "10",
+                "name" : "John Fox",
+                "position" : "mechanic"
+        }
+}
+{
+        "_id" : "12",
+        "EMPLOYEE" : {
+                "e#" : "12",
+                "name" : "Phillip Cox",
+                "position" : "mechanic"
+        }
+}
+{
+        "_id" : "14",
+        "EMPLOYEE" : {
+                "e#" : "14",
+                "name" : "Andrew R. Smith",
+                "position" : "mechanic"
+        }
+}
+> //  3
+> db.transport.find(
+...     {
+...         $or: [
+...             {"TRUCK.registration":"PKR768"}, {"TRUCK.registration":"PKR008"},{"TRUCK.registration":"SST005"}
+...          ]
+...     },
+...     {_id:false}
+... ).pretty();
+{
+        "TRUCK" : {
+                "registration" : "PKR008",
+                "capacity" : 22000,
+                "weight" : 8800,
+                "status" : "AVAILABLE"
+        }
+}
+{
+        "TRUCK" : {
+                "registration" : "PKR768",
+                "capacity" : 1234,
+                "weight" : 3000,
+                "status" : "AVAILABLE"
+        }
+}
+{
+        "TRUCK" : {
+                "registration" : "SST005",
+                "capacity" : 12000,
+                "weight" : 50000,
+                "status" : "USED"
+        }
+}
+> // 4
+> db.transport.find(
+...     {EMPLOYEE: {
+...          $exists: true
+...          }
+...     }
+... ).count();
+15
+> // 5
+> db.transport.find(
+...     {"EMPLOYEE.position":"mechanic"}
+... ).count();
+7
+> //6
+> db.transport.find(
+...     {EMPLOYEE: {
+...         $exists: true
+...         }
+...    },
+...     {_id:false,"EMPLOYEE.name":true,"EMPLOYEE.position":true}
+... ).pretty();
+{ "EMPLOYEE" : { "name" : "John Smith", "position" : "driver" } }
+{ "EMPLOYEE" : { "name" : "Peter Taylor", "position" : "mechanic" } }
+{ "EMPLOYEE" : { "name" : "John Doe", "position" : "driver" } }
+{ "EMPLOYEE" : { "name" : "John Gray", "position" : "mechanic" } }
+{ "EMPLOYEE" : { "name" : "Adam Taylor", "position" : "driver" } }
+{ "EMPLOYEE" : { "name" : "Michael Jones", "position" : "mechanic" } }
+{ "EMPLOYEE" : { "name" : "Frederic Jones", "position" : "driver" } }
+{ "EMPLOYEE" : { "name" : "Peter O'Brien", "position" : "mechanic" } }
+{ "EMPLOYEE" : { "name" : "John Lucas", "position" : "driver" } }
+{ "EMPLOYEE" : { "name" : "John Fox", "position" : "mechanic" } }
+{ "EMPLOYEE" : { "name" : "Adam Fox", "position" : "driver" } }
+{ "EMPLOYEE" : { "name" : "Phillip Cox", "position" : "mechanic" } }
+{ "EMPLOYEE" : { "name" : "Andrew K. Smith", "position" : "driver" } }
+{ "EMPLOYEE" : { "name" : "Andrew R. Smith", "position" : "mechanic" } }
+{ "EMPLOYEE" : { "name" : "Michael Potter", "position" : "driver" } }
+> // 7
+> db.transport.find(
+...     {"EMPLOYEE.name":"John Fox"},
+...     {"EMPLOYEE.maintenances.registration":true}
+... ).pretty();
+{
+        "_id" : "10",
+        "EMPLOYEE" : {
+                "maintenances" : [
+                        {
+                                "registration" : "LUCY01"
+                        },
+                        {
+                                "registration" : "LUCY01"
+                        },
+                        {
+                                "registration" : "KKK007"
+                        },
+                        {
+                                "registration" : "QRT834"
+                        },
+                        {
+                                "registration" : "PKR768"
+                        },
+                        {
+                                "registration" : "KKK007"
+                        },
+                        {
+                                "registration" : "QRT834"
+                        },
+                        {
+                                "registration" : "PKR768"
+                        }
+                ]
+        }
+}
+> // 8
+> db.transport.find(
+...     {"EMPLOYEE.maintenances.registration":"LUCY01"},
+...     {_id:false,"EMPLOYEE.name":true}
+... ).pretty();
+{ "EMPLOYEE" : { "name" : "Michael Jones" } }
+{ "EMPLOYEE" : { "name" : "John Fox" } }
+> // 9
+> db.transport.find(
+...     {"EMPLOYEE.trips": {
+...         $exists: false
+...         },TRUCK: {
+...             $exists: false
+...             }
+...    },
+...     {_id:false,"EMPLOYEE.name":true}
+... ).pretty();
+{ "EMPLOYEE" : { "name" : "Peter Taylor" } }
+{ "EMPLOYEE" : { "name" : "John Gray" } }
+{ "EMPLOYEE" : { "name" : "Michael Jones" } }
+{ "EMPLOYEE" : { "name" : "Peter O'Brien" } }
+{ "EMPLOYEE" : { "name" : "John Fox" } }
+{ "EMPLOYEE" : { "name" : "Phillip Cox" } }
+{ "EMPLOYEE" : { "name" : "Andrew R. Smith" } }
+>

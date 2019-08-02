@@ -1,0 +1,37 @@
+{"TRIPANDTRIPLEG":{"tripnum": " 101 " ,
+"lnum":"10001",
+"regnum":"QRT834",
+"tripdate":"07/AUG/02",
+"tripleg":[{"legnum":"1",
+"departure":"Melbourne",
+"destination":"Sydney"},
+{"legnum":"2",
+"departure":"Sydney",
+"destination":"Perth"},
+{"legnum":"3",
+"departure":"Perth",
+"destination":"Sydney"},
+{"legnum":"4",
+"departure":"Sydney",
+"destination":"Brisbane"}]
+}
+}
+
+db.test.insert({"TRIPANDTRIPLEG":{"tripnum": " 101 " ,
+"lnum":"10001",
+"regnum":"QRT834",
+"tripdate":"07/AUG/02",
+"tripleg":[{"legnum":"1",
+"departure":"Melbourne",
+"destination":"Sydney"},
+{"legnum":"2",
+"departure":"Sydney",
+"destination":"Perth"},
+{"legnum":"3",
+"departure":"Perth",
+"destination":"Sydney"},
+{"legnum":"4",
+"departure":"Sydney",
+"destination":"Brisbane"}]
+}
+})

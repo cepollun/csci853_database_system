@@ -1,0 +1,127 @@
+SQL> SET ECHO ON
+SQL> SET FEEDBACK ON
+SQL> SET LINESIZE 100
+SQL> SET PAGESIZE 200
+SQL> SET SERVEROUTPUT ON
+SQL> create or replace FUNCTION TRIPTOBSON (TRIPNUM IN NUMBER ) 
+  2  RETURN VARCHAR2 
+  3  AS 
+  4    BSONINFO VARCHAR2(32766) ;
+  5  
+  6    C_LEGNUM	TRIPLEG.LEG#%type;
+  7    C_DEPART	TRIPLEG.DEPARTURE%type;
+  8    C_DEST	TRIPLEG.DESTINATION%type;
+  9    CURSOR c_tripleg is 
+ 10        SELECT LEG#, DEPARTURE, DESTINATION FROM TRIPLEG WHERE T# = TRIPNUM; 
+ 11  --  
+ 12    C_LNUM TRIP.L#%type;
+ 13    C_REGNUM TRIP.REG#%type;
+ 14    C_TRIPDATE TRIP.TRIP_DATE%type;
+ 15    CURSOR c_trip is 
+ 16        SELECT L#, REG#, TRIP_DATE FROM TRIP WHERE T# = TRIPNUM; 
+ 17  --    
+ 18    hexval NUMBER;
+ 19    systemtime VARCHAR2(32766);
+ 20  BEGIN  
+ 21  -- Gen the rest of items of BSON doucument
+ 22     OPEN c_trip; 
+ 23     FETCH c_trip into C_LNUM, C_REGNUM, C_TRIPDATE;
+ 24     IF c_trip%notfound THEN
+ 25          DBMS_OUTPUT.put_line('There is no data found at first.');
+ 26          BSONINFO := '{'|| chr(10)||'}';
+ 27     ELSIF c_trip%found THEN
+ 28          DBMS_OUTPUT.put_line('THERE IS data in the following at first.');
+ 29          BSONINFO := '{"TRIPANDTRIPLEG":{"tripnum":' ||' " ' ||TRIPNUM || ' " ' || ','|| chr(10);
+ 30             WHILE  c_trip%found LOOP
+ 31  --           DBMS_OUTPUT.put_line('There is  data in the following.');
+ 32             FETCH c_trip into C_LNUM, C_REGNUM, C_TRIPDATE;
+ 33                BSONINFO :=  BSONINFO ||'"lnum":'||'"'||C_LNUM||'"'||','|| chr(10)
+ 34                                      ||'"regnum":'||'"'||C_REGNUM||'"'||','|| chr(10)
+ 35                                      ||'"tripdate":'||'"'||C_TRIPDATE||'"'||','|| chr(10)
+ 36                                      ||'"tripleg":[';
+ 37             END LOOP; 
+ 38             CLOSE c_trip; 
+ 39          --   
+ 40             OPEN c_tripleg; 
+ 41             LOOP 
+ 42             FETCH c_tripleg into C_LEGNUM, C_DEPART, C_DEST; 
+ 43                EXIT WHEN c_tripleg%notfound; 
+ 44                BSONINFO :=  BSONINFO ||'{'
+ 45                                      ||'"legnum":"'||C_LEGNUM||'"'||','|| chr(10)
+ 46                                      ||'"departure":"'||C_DEPART||'"'||','|| chr(10)
+ 47                                      ||'"destination":"'||C_DEST||'"'||'},' || chr(10);
+ 48  
+ 49             END LOOP; 
+ 50             -- 
+ 51              SELECT SUBSTR(BSONINFO , 1, INSTR(BSONINFO , ',', -1)-1)
+ 52              INTO BSONINFO 
+ 53              FROM dual;
+ 54             BSONINFO :=  BSONINFO ||']' || chr(10)
+ 55                                   ||'}' ;
+ 56             CLOSE c_tripleg; 
+ 57  
+ 58          -- 
+ 59             BSONINFO :=  BSONINFO ||chr(10)
+ 60                                   ||'}' ;
+ 61    END IF;
+ 62    RETURN BSONINFO;
+ 63  END TRIPTOBSON;
+ 64  /
+
+Function TRIPTOBSON compiled
+
+SQL> 
+SQL> EXECUTE DBMS_OUTPUT.put_line(TRIPTOBSON(101));
+THERE IS data in the following at first.
+{"TRIPANDTRIPLEG":{"tripnum": " 101 " ,
+"lnum":"10001",
+"regnum":"QRT834",
+"tripdate":"07/AUG/02",
+"tripleg":[{"legnum":"1",
+"departure":"Melbourne",
+"destination":"Sydney"},
+{"legnum":"2",
+"departure":"Sydney",
+"destination":"Perth"},
+{"legnum":"3",
+"departure":"Perth",
+"destination":"Sydney"},
+{"legnum":"4",
+"departure":"Sydney",
+"destination":"Brisbane"}]
+}
+}
+
+
+PL/SQL procedure successfully completed.
+
+SQL> EXECUTE DBMS_OUTPUT.put_line(TRIPTOBSON(1));
+THERE IS data in the following at first.
+{"TRIPANDTRIPLEG":{"tripnum": " 1 " ,
+"lnum":"10001",
+"regnum":"PKR768",
+"tripdate":"12/JAN/95",
+"tripleg":[{"legnum":"1",
+"departure":"Sydney",
+"destination":"Melbourne"},
+{"legnum":"2",
+"departure":"Melbourne",
+"destination":"Adelaide"},
+{"legnum":"3",
+"departure":"Adelaide",
+"destination":"Sydney"}]
+}
+}
+
+
+PL/SQL procedure successfully completed.
+
+SQL> EXECUTE DBMS_OUTPUT.put_line(TRIPTOBSON(109));
+There is no data found at first.
+{
+}
+
+
+PL/SQL procedure successfully completed.
+
+SQL> SPOOL OFF
