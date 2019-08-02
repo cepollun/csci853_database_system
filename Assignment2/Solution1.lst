@@ -1,0 +1,65 @@
+SQL> SET ECHO ON
+SQL> SET FEEDBACK ON
+SQL> SET LINESIZE 100
+SQL> SET PAGESIZE 200
+SQL> SET SERVEROUTPUT ON
+SQL> 
+SQL> EXECUTE INSERT INTO TRIP VALUES(109, 10002, 'KKK007', TO_DATE('02-SEP-2002','DD-MON-YYYY') );
+
+Error starting at line : 8 in command -
+BEGIN INSERT INTO TRIP VALUES(109, 10002, 'KKK007', TO_DATE('02-SEP-2002','DD-MON-YYYY') ); END;
+Error report -
+ORA-00001: unique constraint (XUCHANG.TRIP_PKEY) violated
+ORA-06512: at line 1
+00001. 00000 -  "unique constraint (%s.%s) violated"
+*Cause:    An UPDATE or INSERT statement attempted to insert a duplicate key.
+           For Trusted Oracle configured in DBMS MAC mode, you may see
+           this message if a duplicate entry exists at a different level.
+*Action:   Either remove the unique restriction or do not insert the key.
+SQL> 
+SQL> CREATE OR REPLACE PROCEDURE INSERT_TRIPLEG(TNUM IN NUMBER, LNUM IN NUMBER, DEPARTURE IN VARCHAR, DESTINATION IN VARCHAR) IS
+  2  OLD_DESTINATION TRIPLEG.DESTINATION%TYPE;
+  3  BEGIN
+  4      DECLARE
+  5          INSERT_ERROR EXCEPTION;
+  6      BEGIN
+  7          IF LNUM > 1 THEN
+  8          SELECT DESTINATION INTO OLD_DESTINATION FROM TRIPLEG WHERE T# = TNUM AND LEG# = LNUM - 1;
+  9          END IF;
+ 10          IF LNUM = 1 OR OLD_DESTINATION = DEPARTURE THEN
+ 11              INSERT INTO TRIPLEG VALUES(TNUM, LNUM, DEPARTURE, DESTINATION);
+ 12          ELSE
+ 13              RAISE INSERT_ERROR;
+ 14          END IF;
+ 15      EXCEPTION
+ 16      WHEN INSERT_ERROR THEN
+ 17          DBMS_OUTPUT.put_line('new trip leg where the consistency constraint is violated.!!!!!');
+ 18      END;
+ 19      COMMIT;
+ 20  END INSERT_TRIPLEG;
+ 21  /
+
+Procedure INSERT_TRIPLEG compiled
+
+SQL> 
+SQL> EXECUTE INSERT_TRIPLEG(109, 1, 'CITY1', 'CITY2');
+
+PL/SQL procedure successfully completed.
+
+SQL> EXECUTE INSERT_TRIPLEG(109, 2, 'CITY2', 'CITY3');
+
+PL/SQL procedure successfully completed.
+
+SQL> EXECUTE INSERT_TRIPLEG(109, 3, 'CITY3', 'CITY4');
+
+PL/SQL procedure successfully completed.
+
+SQL> EXECUTE INSERT_TRIPLEG(109, 4, 'CITY5', 'CITY1');
+new trip leg where the consistency constraint is violated.!!!!!
+
+
+PL/SQL procedure successfully completed.
+
+SQL> 
+SQL> 
+SQL> SPOOL OFF
